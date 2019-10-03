@@ -2,7 +2,7 @@
 var regex = /^[a-z\d_,]*$/;
 
 //Search all frames on the current page
-const allNodes = figma.currentPage.findAll(node => node.type === "FRAME").map(it => it.name).toString();
+var allNodes = figma.currentPage.findAll().map(it => it.name).toString();
 
 //Showing alert
 if (regex.test(allNodes) == true) {
