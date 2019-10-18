@@ -1,6 +1,7 @@
 //Validate regex. Only lowercase (a-z ) and with '_' frames 
 var regex = /^[a-z\d_,]*$/;
 var allNodes;
+var problemObjects = [];
 let count = 0;
 
 //Search all frames and instances on the current page
@@ -15,6 +16,7 @@ for (let index in allNodes) {
     let frame = allNodes[index];
     if (regex.test(frame.name) != true) {
         count++
+        problemObjects.push(frame);
         continue;
     }
 }
@@ -24,7 +26,11 @@ if (count == 0) {
     alert('Cool 😎');
 }
 else {
-    alert('🚨🚨🚨 You have' + count + ' errors.');
+    alert('🚨🚨🚨 You have ' + count + ' errors.');
 }
 
+// Selecting problem elements
+figma.currentPage.selection = problemObjects;
+
+// Close plugin
 figma.closePlugin();
