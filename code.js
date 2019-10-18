@@ -1,20 +1,36 @@
 //Validate regex. Only lowercase (a-z ) and with '_' frames 
 var regex = /^[a-z\d_,]*$/;
 var allNodes;
+var problemObjects = [];
+let count = 0;
 
 //Search all frames and instances on the current page
-const allFrames = figma.currentPage.findAll(node => node.type === "FRAME" && node.parent.type != "FRAME").map(it => it.name).toString();
-const allInstances = figma.currentPage.findAll(node => node.type === "INSTANCE" && node.parent.type != "INSTANCE" && node.parent.type != "FRAME").map(it => it.name).toString();
+const allFrames = figma.currentPage.findAll(node => node.type === "FRAME" && node.parent.type != "FRAME")
+const allInstances = figma.currentPage.findAll(node => node.type === "INSTANCE" && node.parent.type != "INSTANCE" && node.parent.type != "FRAME")
 
 //Merging frame and instances names
-allNodes = allFrames+allInstances
+allNodes = allFrames.concat(allInstances);
 
-//Showing alert
-if (regex.test(allNodes) == true) {
+// Check frames and instances with regex
+for (let index in allNodes) {
+    let frame = allNodes[index];
+    if (regex.test(frame.name) != true) {
+        count++
+        problemObjects.push(frame);
+        continue;
+    }
+}
+
+// Showing alert
+if (count == 0) {
     alert('Cool 😎');
 }
 else {
-    alert('🚨🚨🚨 Сheck your frame names');
+    alert('🚨🚨🚨 You have ' + count + ' errors.');
 }
 
-figma.closePlugin()
+// Selecting problem elements
+figma.currentPage.selection = problemObjects;
+
+// Close plugin
+figma.closePlugin();
