@@ -23,7 +23,7 @@ for (let index in allNodes) {
 
 // Showing alert
 if (count == 0) {
-    alert('Cool 😎');
+    figma.notify('Cool 😎', { timeout: 1500 });
 }
 else {
     // Selecting problem elements
@@ -31,7 +31,7 @@ else {
     figma.viewport.scrollAndZoomIntoView(problemObjects);
 
     // Error alert text
-    alert('🚨🚨🚨 You have ' + count + ' errors.');
+    figma.notify('🚨🚨🚨 You are have ' + count + ' errors', { timeout: 3000 });
 }
 
 // Close plugin
