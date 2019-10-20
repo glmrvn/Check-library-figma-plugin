@@ -1,5 +1,7 @@
-//Validate regex. Only lowercase (a-z) with '_'
+//REGEX. Only lowercase (a-z) with '_'
 var regex = /^[a-z\d_]*$/;
+
+//Creating variables
 var allNodes;
 var problemObjects = [];
 let count = 0;
