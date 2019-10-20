@@ -1,5 +1,7 @@
-//Validate regex. Only lowercase (a-z) with '_'
+//REGEX. Only lowercase (a-z) with '_'
 var regex = /^[a-z\d_]*$/;
+
+//Creating variables
 var allNodes;
 var problemObjects = [];
 let count = 0;
@@ -23,7 +25,7 @@ for (let index in allNodes) {
 
 // Showing notification
 if (count == 0) {
-    figma.notify('Cool 😎', { timeout: 1500 });
+    figma.notify('Cool 😎', { timeout: 2000 });
 }
 else {
     // Selecting problem elements and move to viewport

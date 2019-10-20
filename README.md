@@ -4,4 +4,4 @@ These plugin validates frames and instances names and shows an alert if you have
 
 **Validating regular expression**
 
-    /^[a-z\d_,]*$/
+    /^[a-z\d_]*$/
