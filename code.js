@@ -25,7 +25,7 @@ for (let index in allNodes) {
 
 // Showing notification
 if (count == 0) {
-    figma.notify('Cool 😎', { timeout: 1500 });
+    figma.notify('Cool 😎', { timeout: 2000 });
 }
 else {
     // Selecting problem elements and move to viewport
