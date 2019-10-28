@@ -5,11 +5,12 @@ var regex = /^[a-z\d_]*$/;
 var allNodes;
 var problemObjects = [];
 let count = 0;
+let startIndex = 100000;
 
 //Search frames, instances and colors on the current page
 const allFrames = figma.currentPage.findAll(node => node.type === "FRAME" && node.parent.type != "FRAME");
 const allInstances = figma.currentPage.findAll(node => node.type === "INSTANCE" && node.parent.type != "INSTANCE" && node.parent.type != "FRAME");
-const allColors = figma.currentPage.findAll(node => node.type === "RECTANGLE" && node.width === 40 && node.height === 40 && node.parent.type === "GROUP");
+const allColors = figma.currentPage.findAll(node => node.type === "RECTANGLE" && node.parent.type === "PAGE" && node.width === 40);
 const allText = figma.currentPage.findAll(node => node.type === "TEXT" && node.parent.type === "PAGE");
 
 //Merging frame, instances and colors
@@ -24,6 +25,29 @@ for (let index in allNodes) {
         continue;
     }
 }
+
+// Sorting all layers by name
+allNodes
+  .map(node => {
+    const parent = node.parent;
+    startIndex = Math.min(startIndex, parent.children.indexOf(node));
+    return {
+      node,
+      parent
+    };
+  })
+  .sort((a, b) =>
+    figma.command === "desc"
+      ? a.node.name.localeCompare(b.node.name, undefined, {
+          numeric: true
+        })
+      : b.node.name.localeCompare(a.node.name, undefined, {
+          numeric: true
+        })
+  )
+  .forEach((obj, i) => {
+    obj.parent.insertChild(startIndex + i, obj.node);
+  });
 
 // Showing notification
 if (count == 0) {
