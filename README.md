@@ -12,7 +12,7 @@ A designer should run this plugin after adding new assets to the library and che
 * Choose manifest.json file
 * Done
 
-## Validating regular expression**
+## Validating regular expression
 Only lowercase (a-z, 0-9) with "_"
 
     /^[a-z\d_]*$/
