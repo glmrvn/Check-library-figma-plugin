@@ -1,15 +1,15 @@
 # Check library. Figma plugin. 
-A designer should run this plugin after adding new assets to the library and check the library status.
+A designer should run this plugin after adding new assets to the library and check status.
 
 ## What plugin do
 * Validates object names (frames, instances, colors, text style)
 * Sort all layers by name
-* Show an alert if you have mistakes or all right
+* Show an alert if the library has mistakes
 
 ## How to install
-* Select the Plugins Page in the File Browser
-* Use the plus button in the Development section
-* Choose manifest.json file
+* Select the Plugins Page in the Figma File Browser
+* Use the plus (+) button in the Development section
+* Choose file manifest.json 
 * Done
 
 ## Validating regular expression
