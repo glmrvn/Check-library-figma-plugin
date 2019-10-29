@@ -26,6 +26,20 @@ for (let index in allNodes) {
     }
 }
 
+//Check duplicate object names
+var duplicates = Object.values(allNodes.reduce((c, v) => {
+  let k = v.name;
+  c[k] = c[k] || [];
+  c[k].push(v);
+  return c;
+}, {})).reduce((c, v) => v.length > 1 ? c.concat(v) : c, []);
+
+if (duplicates.length > 0) {
+  figma.notify('🚨🚨🚨 You are have name duplicates', { timeout: 3000 });
+  figma.currentPage.selection = duplicates;
+  figma.viewport.scrollAndZoomIntoView(duplicates);
+}
+
 // Find all sorting objects
 const allSorted = figma.currentPage.findAll(node => node.parent.type === "PAGE")
 
@@ -53,10 +67,10 @@ allSorted
   });
 
 // Showing notification
-if (count == 0) {
+if (count == 0 && duplicates.length == 0) {
     figma.notify('Cool 😎', { timeout: 2000 });
 }
-else {
+if (count > 0) {
     // Selecting problem elements and move to viewport
     figma.currentPage.selection = problemObjects;
     figma.viewport.scrollAndZoomIntoView(problemObjects);
