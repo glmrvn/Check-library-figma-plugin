@@ -3,7 +3,6 @@ var regex = /^[a-z\d_]*$/;
 
 //Creating variables
 var allNodes;
-var searchDuplicates;
 var problemObjects = [];
 let count = 0;
 let startIndex = 100000;
@@ -16,7 +15,6 @@ const allText = figma.currentPage.findAll(node => node.type === "TEXT" && node.p
 
 //Merging frame, instances and colors
 allNodes = allFrames.concat(allInstances, allColors, allText);
-searchDuplicates = allFrames.concat(allInstances, allColors);
 
 // Validating frames and instances with regex
 for (let index in allNodes) {
@@ -29,7 +27,7 @@ for (let index in allNodes) {
 }
 
 //Check duplicate object names
-var duplicates = Object.values(searchDuplicates.reduce((c, v) => {
+var duplicates = Object.values(allNodes.reduce((c, v) => {
   let k = v.name;
   c[k] = c[k] || [];
   c[k].push(v);
@@ -72,7 +70,7 @@ allSorted
 if (count == 0 && duplicates.length == 0) {
     figma.notify('Cool 😎', { timeout: 2000 });
 }
-if (count > 0) {
+if (count > 0 && duplicates.length == 0) {
     // Selecting problem elements and move to viewport
     figma.currentPage.selection = problemObjects;
     figma.viewport.scrollAndZoomIntoView(problemObjects);
