@@ -91,7 +91,7 @@ if (count > 0 && duplicates.length == 0) {
     figma.viewport.scrollAndZoomIntoView(problemObjects);
 
     // Error notification text
-    figma.notify('🚨🚨🚨 You are have ' + count + 'name errors', { timeout: 3000 });
+    figma.notify('🚨🚨🚨 ' + count + ' naming errors', { timeout: 3000 });
 }
 
 // Close plugin
