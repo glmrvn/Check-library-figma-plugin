@@ -14,7 +14,7 @@ const allColors = figma.currentPage.findAll(node => node.type === "RECTANGLE" &&
 const allText = figma.currentPage.findAll(node => node.type === "TEXT" && node.parent.type === "PAGE");
 
 //Merging frame, instances and colors
-allNodes = allFrames.concat(allInstances, allColors, allText);
+allNodes = allFrames.concat(allInstances, allColors);
 
 // Validating frames and instances with regex
 for (let index in allNodes) {
@@ -28,9 +28,24 @@ for (let index in allNodes) {
 
 //Check duplicate object names
 var duplicates = Object.values(allNodes.reduce((c, v) => {
-  let k = v.name;
-  c[k] = c[k] || [];
-  c[k].push(v);
+  const daySuffix = "_day";
+  const nightSuffix = "_night";
+
+  let name = v.name;
+
+  if (!name.endsWith(daySuffix) && !name.endsWith(nightSuffix)) {
+    let dayName = name + daySuffix
+    c[dayName] = c[dayName] || [];
+    c[dayName].push(v);
+
+    let nightName = name + nightSuffix
+    c[nightName] = c[nightName] || [];
+    c[nightName].push(v);
+  } else {
+    c[name] = c[name] || [];
+    c[name].push(v);
+  }
+  
   return c;
 }, {})).reduce((c, v) => v.length > 1 ? c.concat(v) : c, []);
 
