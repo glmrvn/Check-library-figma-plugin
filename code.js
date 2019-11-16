@@ -1,9 +1,7 @@
 //REGEX. Only lowercase (a-z) with '_'
 const regex = /^[a-z\d_]*$/;
 
-const startIndex = 100000;
-
-//Find frames, instances and colors on the current page
+//Searching frames, instances and colors on the current page
 const allFrames = figma.currentPage.findAll(node => node.type === "FRAME" && node.parent.type != "FRAME");
 const allInstances = figma.currentPage.findAll(node => node.type === "INSTANCE" && node.parent.type != "INSTANCE" && node.parent.type != "FRAME");
 const allColors = figma.currentPage.findAll(node => node.type === "RECTANGLE" && node.parent.type === "PAGE" && node.width === 40);
@@ -13,6 +11,8 @@ const allNodes = [...allFrames, ...allInstances, ...allColors];
 
 // Validating frames and instances with regex
 const problemObjects = allNodes.filter((node) => !regex.test(node.name));
+
+// Searching duplicates
 const namesDictionary = allNodes.reduce((c, v) => {
     const daySuffix = "_day";
     const nightSuffix = "_night";
@@ -48,6 +48,7 @@ if (duplicateNames.length > 0) {
 const allSortedNodes = figma.currentPage.findAll(node => node.parent.type === "PAGE")
 
 // Sorting layers by name
+const startIndex = 100000;
 allSortedNodes
   .map(node => {
     const parent = node.parent;
