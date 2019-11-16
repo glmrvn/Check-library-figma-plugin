@@ -49,7 +49,7 @@ if (duplicateNames.length > 0) {
 const allSortedNodes = figma.currentPage.findAll(node => node.parent.type === "PAGE")
 
 // Sorting layers by name
-const startIndex = 100000;
+let startIndex = 100000;
 allSortedNodes
   .map(node => {
     const parent = node.parent;
