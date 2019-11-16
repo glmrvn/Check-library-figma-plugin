@@ -1,12 +1,12 @@
-//REGEX. Only lowercase (a-z) with '_'
+// REGEX. Only lowercase (a-z) with '_'
 const regex = /^[a-z\d_]*$/;
 
-//Searching frames, instances and colors on the current page
+// Searching frames, instances and colors on the current page
 const allFrames = figma.currentPage.findAll(node => node.type === "FRAME" && node.parent.type != "FRAME");
 const allInstances = figma.currentPage.findAll(node => node.type === "INSTANCE" && node.parent.type != "INSTANCE" && node.parent.type != "FRAME");
 const allColors = figma.currentPage.findAll(node => node.type === "RECTANGLE" && node.parent.type === "PAGE" && node.width === 40);
 
-//Merging frame, instances and colors
+// Merging frames, instances and colors
 const allNodes = [...allFrames, ...allInstances, ...allColors];
 
 // Validating frames and instances with regex
@@ -35,11 +35,12 @@ const namesDictionary = allNodes.reduce((c, v) => {
     return c;
   }, {});
 
-//Check duplicate object names
 const duplicateNames = Object.values(namesDictionary).reduce((c, v) => v.length > 1 ? c.concat(v) : c, []);
 
 if (duplicateNames.length > 0) {
+  // Showing notification
   figma.notify('🚨🚨🚨 You are have name duplicates', { timeout: 3000 });
+  // Selecting duplicate elements and move to viewport
   figma.currentPage.selection = duplicateNames;
   figma.viewport.scrollAndZoomIntoView(duplicateNames);
 }
