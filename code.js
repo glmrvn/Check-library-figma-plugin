@@ -18,60 +18,69 @@ const allNodes = [...allFrames, ...allInstances, ...allColors]
 // ------------------------------------------------------------------------------------
 // ------------------------------------VALIDAION---------------------------------------
 
-const objectsWithInvalidNames = allNodes.filter((node) => !regex.test(node.name))
+let hasValidationError = false
 
-if (objectsWithInvalidNames.length > 0) {
-  notify(`🚨🚨🚨 ${objectsWithInvalidNames.length} naming errors`, objectsWithInvalidNames)
-  exit()
+try {
+  const objectsWithInvalidNames = allNodes.filter((node) => !regex.test(node.name))
+
+  if (objectsWithInvalidNames.length > 0) {
+    throw { msg: `${objectsWithInvalidNames.length} naming errors`, objects: stats.objects }
+  }
+
+  // ------------------------------------------------------------------------------------
+
+  const namesStats = collectNamesStats(allNodes)
+
+  for (const normalizedName in namesStats) {
+    const stats = namesStats[normalizedName]
+
+    if (stats[daySuffix] > 1) {
+      throw { msg: "Too much day-theme objects", objects: stats.objects }
+    }
+
+    if (stats[nightSuffix] > 1) {
+      throw { msg: "Too much night-theme objects", objects: stats.objects }
+    }
+
+    if (stats[daySuffix] !== stats[nightSuffix]) {
+      throw { msg: "Unbalanced names", objects: stats.objects }
+    }
+  }
+} catch (error) {
+  notify(`🚨🚨🚨 ${error.msg}`, error.objects)
+  hasValidationError = true
 }
 
 // ------------------------------------------------------------------------------------
-
-const namesStats = collectNamesStats(allNodes)
-
-for (const normalizedName in namesStats) {
-  const stats = namesStats[normalizedName]
-
-  if (stats[daySuffix] > 1) {
-    notify(`🚨🚨🚨 Too much day-theme objects`, stats.objects)
-    exit()
-  }
-
-  if (stats[nightSuffix] > 1) {
-    notify(`🚨🚨🚨 Too much night-theme objects`, stats.objects)
-    exit()
-  }
-
-  if (stats[daySuffix] !== stats[nightSuffix]) {
-    notify(`🚨🚨🚨 Unbalanced names`, stats.objects)
-    exit()
-  }
-}
-
 // -------------------------------------SORTING----------------------------------------
 
-const allSortedNodes = collectObjectsWithPredicate(node => node.parent.type === "PAGE")
+if (!hasValidationError) {
+  const allSortedNodes = collectObjectsWithPredicate(node => node.parent.type === "PAGE")
 
-let startIndex = 100000
-allSortedNodes
-  .map(node => {
-    const parent = node.parent
-    startIndex = Math.min(startIndex, parent.children.indexOf(node))
-    return { node, parent }
-  })
-  .sort((a, b) =>
-    figma.command === "desc" ?
-        a.node.name.localeCompare(b.node.name, undefined, {numeric: true}) :
-        b.node.name.localeCompare(a.node.name, undefined, {numeric: true})
-  )
-  .forEach((obj, i) => {
-    obj.parent.insertChild(startIndex + i, obj.node)
-  })
+  let startIndex = 100000
+  allSortedNodes
+    .map(node => {
+      const parent = node.parent
+      startIndex = Math.min(startIndex, parent.children.indexOf(node))
+      return { node, parent }
+    })
+    .sort((a, b) =>
+      figma.command === "desc" ?
+          a.node.name.localeCompare(b.node.name, undefined, {numeric: true}) :
+          b.node.name.localeCompare(a.node.name, undefined, {numeric: true})
+    )
+    .forEach((obj, i) => {
+      obj.parent.insertChild(startIndex + i, obj.node)
+    })
+}
 
 // ------------------------------------------------------------------------------------
 
-notify("👌🏻 Everything is okay")
-exit()
+if (!hasValidationError) {
+  notify("👌🏻 Everything is okay")
+}
+
+figma.closePlugin()
 
 // ------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------
@@ -138,9 +147,4 @@ function notify(notification, objectsToReveal) {
     figma.currentPage.selection = objectsToReveal
     figma.viewport.scrollAndZoomIntoView(objectsToReveal)
   }
-}
-
-function exit() {
-  figma.closePlugin()
-  return
 }
