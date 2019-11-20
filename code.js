@@ -1,60 +1,63 @@
+// ------------------------------------CONSTANTS---------------------------------------
+
 // REGEX. Only lowercase (a-z) with '_'
-const regex = /^[a-z\d_]*$/;
+const regex = /^[a-z\d_]*$/
 
-// Searching frames, instances and colors on the current page
-const allFrames = figma.currentPage.findAll(node => node.type === "FRAME" && node.parent.type != "FRAME");
-const allInstances = figma.currentPage.findAll(node => node.type === "INSTANCE" && node.parent.type != "INSTANCE" && node.parent.type != "FRAME");
-const allColors = figma.currentPage.findAll(node => node.type === "RECTANGLE" && node.parent.type === "PAGE" && node.width === 40);
+const themeSuffixSeparator = "_"
+const daySuffix = "day"
+const nightSuffix = "night"
 
-// Merging frames, instances and colors
-const allNodes = [...allFrames, ...allInstances, ...allColors];
+// ----------------------------------FIGMA OBJECTS-------------------------------------
 
-// Validating frames and instances with regex
-const problemObjects = allNodes.filter((node) => !regex.test(node.name));
+const allFrames = collectObjectsWithPredicate(node => node.type === "FRAME" && node.parent.type != "FRAME")
+const allInstances = collectObjectsWithPredicate(node => node.type === "INSTANCE" && node.parent.type != "INSTANCE" && node.parent.type != "FRAME")
+const allColors = collectObjectsWithPredicate(node => node.type === "RECTANGLE" && node.parent.type === "PAGE" && node.width === 40)
 
-// Searching duplicates
-const namesDictionary = allNodes.reduce((c, v) => {
-    const daySuffix = "_day";
-    const nightSuffix = "_night";
+const allNodes = [...allFrames, ...allInstances, ...allColors]
 
-    const name = v.name;
+// ------------------------------------------------------------------------------------
+// ------------------------------------VALIDAION---------------------------------------
 
-    if (!name.endsWith(daySuffix) && !name.endsWith(nightSuffix)) {
-      const dayName = name + daySuffix
-      c[dayName] = c[dayName] || [];
-      c[dayName].push(v);
+const objectsWithInvalidNames = allNodes.filter((node) => !regex.test(node.name))
 
-      const nightName = name + nightSuffix
-      c[nightName] = c[nightName] || [];
-      c[nightName].push(v);
-    } else {
-      c[name] = c[name] || [];
-      c[name].push(v);
-    }
-
-    return c;
-  }, {});
-
-const duplicateNames = Object.values(namesDictionary).reduce((c, v) => v.length > 1 ? c.concat(v) : c, []);
-
-if (duplicateNames.length > 0) {
-  // Showing notification
-  figma.notify('🚨🚨🚨 You are have name duplicates', { timeout: 3000 });
-  // Selecting duplicate elements and move to viewport
-  figma.currentPage.selection = duplicateNames;
-  figma.viewport.scrollAndZoomIntoView(duplicateNames);
+if (objectsWithInvalidNames.length > 0) {
+  notify(`🚨🚨🚨 ${objectsWithInvalidNames.length} naming errors`, objectsWithInvalidNames)
+  exit()
 }
 
-// Find all sorting objects
-const allSortedNodes = figma.currentPage.findAll(node => node.parent.type === "PAGE")
+// ------------------------------------------------------------------------------------
 
-// Sorting layers by name
-let startIndex = 100000;
+const namesStats = collectNamesStats(allNodes)
+
+for (const normalizedName in namesStats) {
+  const stats = namesStats[normalizedName]
+
+  if (stats[daySuffix] > 1) {
+    notify(`🚨🚨🚨 Too much day-theme objects`, stats.objects)
+    exit()
+  }
+
+  if (stats[nightSuffix] > 1) {
+    notify(`🚨🚨🚨 Too much night-theme objects`, stats.objects)
+    exit()
+  }
+
+  if (stats[daySuffix] !== stats[nightSuffix]) {
+    notify(`🚨🚨🚨 Unbalanced names`, stats.objects)
+    exit()
+  }
+}
+
+// -------------------------------------SORTING----------------------------------------
+
+const allSortedNodes = collectObjectsWithPredicate(node => node.parent.type === "PAGE")
+
+let startIndex = 100000
 allSortedNodes
   .map(node => {
-    const parent = node.parent;
-    startIndex = Math.min(startIndex, parent.children.indexOf(node));
-    return {node, parent};
+    const parent = node.parent
+    startIndex = Math.min(startIndex, parent.children.indexOf(node))
+    return { node, parent }
   })
   .sort((a, b) =>
     figma.command === "desc" ?
@@ -62,21 +65,82 @@ allSortedNodes
         b.node.name.localeCompare(a.node.name, undefined, {numeric: true})
   )
   .forEach((obj, i) => {
-    obj.parent.insertChild(startIndex + i, obj.node);
-  });
+    obj.parent.insertChild(startIndex + i, obj.node)
+  })
 
-// Showing notification
-if (problemObjects.length == 0 && duplicateNames.length == 0) {
-    figma.notify('Cool 😎', { timeout: 2000 });
+// ------------------------------------------------------------------------------------
+
+notify("👌🏻 Everything is okay")
+exit()
+
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
+
+function collectObjectsWithPredicate(predicate) {
+  return figma.currentPage.findAll(predicate)
 }
-if (problemObjects.length > 0 && duplicateNames.length == 0) {
-    // Selecting problem elements and move to viewport
-    figma.currentPage.selection = problemObjects;
-    figma.viewport.scrollAndZoomIntoView(problemObjects);
 
-    // Error notification text
-    figma.notify(`🚨🚨🚨 ${problemObjects.length} naming errors`, { timeout: 3000 });
+function getNormalizedName(name) {
+  const parts = name.split(themeSuffixSeparator)
+  const partsNumber = parts.length
+
+  if (partsNumber == 0) { return name }
+  const lastPart = parts[partsNumber - 1]
+
+  if (lastPart === daySuffix) {
+    return { name: parts.slice(0, -1).join(themeSuffixSeparator), suffix: daySuffix }
+  } else if (lastPart === nightSuffix) {
+    return { name: parts.slice(0, -1).join(themeSuffixSeparator), suffix: nightSuffix }
+  } else {
+    return { name }
+  }
 }
 
-// Close plugin
-figma.closePlugin();
+function collectNamesStats(objects) {
+  return objects.reduce((acc, obj) => {
+    const normalizedName = getNormalizedName(obj.name)
+
+    if (acc[normalizedName.name]) {
+      if (normalizedName.suffix) {
+        acc[normalizedName.name][normalizedName.suffix] += 1
+      } else {
+        acc[normalizedName.name][daySuffix] += 1
+        acc[normalizedName.name][nightSuffix] += 1
+      }
+
+      acc[normalizedName.name].objects.push(obj)
+    } else {
+      acc[normalizedName.name] = { objects: [obj] }
+
+      if (normalizedName.suffix) {
+        acc[normalizedName.name][daySuffix] = 0
+        acc[normalizedName.name][nightSuffix] = 0
+        acc[normalizedName.name][normalizedName.suffix] = 1
+      } else {
+        acc[normalizedName.name][daySuffix] = 1
+        acc[normalizedName.name][nightSuffix] = 1
+      }
+    }
+
+    return acc
+  }, {})
+}
+
+// ------------------------------------------------------------------------------------
+// -------------------------------------SUPPORT----------------------------------------
+
+function notify(notification, objectsToReveal) {
+  // Showing notification
+  figma.notify(notification, { timeout: 3000 })
+  // Selecting duplicate elements and move to viewport
+  if (objectsToReveal) {
+    figma.currentPage.selection = objectsToReveal
+    figma.viewport.scrollAndZoomIntoView(objectsToReveal)
+  }
+}
+
+function exit() {
+  figma.closePlugin()
+  return
+}
