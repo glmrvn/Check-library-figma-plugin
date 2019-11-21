@@ -1,6 +1,8 @@
 # Check library. Figma plugin. 
 A designer should run this plugin after adding new assets to the library and check status.
 
+![Image of Yaktocat](https://i.imgur.com/4YcF6fo.png)
+
 ## What plugin do
 * Validate objects name (frames, instances, colors)
 * Sort all layers by name
