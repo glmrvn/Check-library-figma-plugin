@@ -32,15 +32,15 @@ try {
   for (const normalizedName in namesStats) {
     const stats = namesStats[normalizedName]
 
-    if (stats[daySuffix] > 1) {
+    if (stats[daySuffix] > 1 && objectsWithInvalidNames.length == 0) {
       throw { msg: "Duplicates", objects: stats.objects }
     }
 
-    if (stats[nightSuffix] > 1) {
+    if (stats[nightSuffix] > 1 && objectsWithInvalidNames.length == 0) {
       throw { msg: "Duplicates", objects: stats.objects }
     }
 
-    if (stats[daySuffix] !== stats[nightSuffix]) {
+    if (stats[daySuffix] !== stats[nightSuffix] && objectsWithInvalidNames.length == 0) {
       throw { msg: "Unbalanced names", objects: stats.objects }
     }
   }
