@@ -2,8 +2,9 @@
 A designer should run this plugin after adding new assets to the library and check status.
 
 ## What plugin do
-* Validates object names (frames, instances, colors, text style)
+* Validate objects name (frames, instances, colors)
 * Sort all layers by name
+* Check day/night objects balance
 * Show an alert if the library has mistakes
 
 ## How to install
