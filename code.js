@@ -11,7 +11,7 @@ const nightSuffix = "night"
 
 const allFrames = collectObjectsWithPredicate(node => node.type === "FRAME" && node.parent.type != "FRAME")
 const allInstances = collectObjectsWithPredicate(node => node.type === "INSTANCE" && node.parent.type != "INSTANCE" && node.parent.type != "FRAME")
-const allColors = collectObjectsWithPredicate(node => node.type === "RECTANGLE" && node.parent.type === "PAGE" && node.width === 40)
+const allColors = collectObjectsWithPredicate(node => node.type === "RECTANGLE" && node.width === 40 && node.height === 40)
 
 const allNodes = [...allFrames, ...allInstances, ...allColors]
 
@@ -20,26 +20,24 @@ const allNodes = [...allFrames, ...allInstances, ...allColors]
 
 let hasValidationError = false
 
+const objectsWithInvalidNames = allNodes.filter((node) => !regex.test(node.name))
+
+if (objectsWithInvalidNames.length > 0) {
+  notify(`🚨🚨🚨 ${objectsWithInvalidNames.length} naming errors`, objectsWithInvalidNames);
+}
+
 try {
-  const objectsWithInvalidNames = allNodes.filter((node) => !regex.test(node.name))
-
-  if (objectsWithInvalidNames.length > 0) {
-    throw { msg: `${objectsWithInvalidNames.length} naming errors`, objects: stats.objects }
-  }
-
-  // ------------------------------------------------------------------------------------
-
   const namesStats = collectNamesStats(allNodes)
 
   for (const normalizedName in namesStats) {
     const stats = namesStats[normalizedName]
 
     if (stats[daySuffix] > 1) {
-      throw { msg: "Too much day-theme objects", objects: stats.objects }
+      throw { msg: "Duplicates", objects: stats.objects }
     }
 
     if (stats[nightSuffix] > 1) {
-      throw { msg: "Too much night-theme objects", objects: stats.objects }
+      throw { msg: "Duplicates", objects: stats.objects }
     }
 
     if (stats[daySuffix] !== stats[nightSuffix]) {
@@ -76,7 +74,7 @@ if (!hasValidationError) {
 
 // ------------------------------------------------------------------------------------
 
-if (!hasValidationError) {
+if (!hasValidationError && objectsWithInvalidNames.length == 0) {
   notify("👌🏻 Everything is okay")
 }
 
