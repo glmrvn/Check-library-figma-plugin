@@ -12,8 +12,9 @@ const nightSuffix = "night"
 const allFrames = collectObjectsWithPredicate(node => node.type === "FRAME" && node.parent.type != "FRAME")
 const allInstances = collectObjectsWithPredicate(node => node.type === "INSTANCE" && node.parent.type != "INSTANCE" && node.parent.type != "FRAME")
 const allColors = collectObjectsWithPredicate(node => node.type === "RECTANGLE" && node.width === 40 && node.height === 40)
+const allGroups = collectObjectsWithPredicate(node => node.type === "GROUP" && node.parent.type === "PAGE")
 
-const allNodes = [...allFrames, ...allInstances, ...allColors]
+const allNodes = [...allFrames, ...allInstances, ...allColors, ...allGroups]
 
 // ------------------------------------------------------------------------------------
 // ------------------------------------VALIDAION---------------------------------------
