@@ -12,9 +12,9 @@ const nightSuffix = "night"
 const allFrames = collectObjectsWithPredicate(node => node.type === "FRAME" && node.parent.type != "FRAME")
 const allInstances = collectObjectsWithPredicate(node => node.type === "INSTANCE" && node.parent.type != "INSTANCE" && node.parent.type != "FRAME")
 const allColors = collectObjectsWithPredicate(node => node.type === "RECTANGLE" && node.width === 40 && node.height === 40 && node.parent.type === "GROUP")
-const allGroups = collectObjectsWithPredicate(node => node.type === "GROUP" && node.parent.type === "PAGE")
+// const allGroups = collectObjectsWithPredicate(node => node.type === "GROUP" && node.parent.type === "PAGE")
 
-const allNodes = [...allFrames, ...allInstances, ...allGroups, ...allColors]
+const allNodes = [...allFrames, ...allInstances]
 
 // ------------------------------------------------------------------------------------
 // ------------------------------------VALIDAION---------------------------------------
@@ -22,13 +22,11 @@ const allNodes = [...allFrames, ...allInstances, ...allGroups, ...allColors]
 let hasValidationError = false
 
 const objectsWithInvalidNames = allNodes.filter((node) => !regex.test(node.name))
+const colorInvalidNames = allColors.filter((node) => !regex.test(node.name))
 
-// const colorInvalidNames = allColors.filter((node) => !regex.test(node.name))
-// console.log(colorInvalidNames)
-
-// if (colorInvalidNames.length > 0) {
-//   notify(`🚨🚨🚨 ${colorInvalidNames.length} naming errors`, colorInvalidNames);
-// }
+if (colorInvalidNames.length > 0) {
+  notify(`🚨🚨🚨 ${colorInvalidNames.length} naming errors`, colorInvalidNames);
+}
 
 if (objectsWithInvalidNames.length > 0) {
   notify(`🚨🚨🚨 ${objectsWithInvalidNames.length} naming errors`, objectsWithInvalidNames);
